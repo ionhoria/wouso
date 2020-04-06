@@ -1,0 +1,43 @@
+version: "3.7"
+
+services:
+  mysql:
+    image: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: wouso
+      MYSQL_PASSWORD: wouso
+      MYSQL_DATABASE: wouso
+    # TODO: add volumes for persistent database storage
+    # volumes:
+
+  phpmyadmin:
+    depends_on:
+      - mysql
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: wouso
+      PMA_PASSWORD: wouso
+    ports:
+      - 8080:80
+
+  wouso-backend:
+    depends_on:
+      - mysql
+    image: wouso-backend
+    restart: always
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_USER: wouso
+      MYSQL_PASSWORD: wouso
+      MYSQL_DATABASE: wouso
+      EXPRESS_PORT: 5000
+      EXPRESS_HOST: "0.0.0.0"
+      SESSION_SECRET: wouso
+    ports:
+      - 5000:5000

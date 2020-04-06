@@ -1,0 +1,6 @@
+node_modules
+config/*.js
+*.log
+.eslintcache
+docker/database/data
+.env
