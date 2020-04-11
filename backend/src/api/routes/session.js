@@ -1,20 +1,18 @@
-const authenticationRouter = require('express').Router()
-const HttpStatus = require('http-status-codes')
-const logger = require('../../logger')
+const { Router } = require('express')
 const User = require('../../models/user')
 const { requiresLogin } = require('../middlewares')
 
-authenticationRouter.get(
-  '/authentication',
-  requiresLogin,
-  async (req, res, next) => {
-    res.json({ ...req.session.user })
-  }
-)
+const route = Router()
 
-authenticationRouter.post('/authentication', async (req, res, next) => {
-  // Bypass LDAP authentication if NOT running in production mode.
-  if (process.env.NODE_ENV !== 'production') {
+route.get('/', requiresLogin, async (req, res, next) => {
+  const { username, email, firstName, lastName, score } = req.session.user
+
+  res.json({ username, email, firstName, lastName, score })
+})
+
+route.post('/', async (req, res, next) => {
+  // Mock authentication if running in development mode.
+  if (process.env.NODE_ENV === 'development') {
     const { session } = req
     let user = await User.findByPk(1)
     if (!user) {
@@ -37,17 +35,18 @@ authenticationRouter.post('/authentication', async (req, res, next) => {
       score,
       targetGroup,
     } = user
-    // session.user = {
-    //   id,
-    //   username,
-    //   email,
-    //   firstName,
-    //   lastName,
-    //   score,
-    //   targetGroup,
-    // }
 
-    return res.json(user)
+    session.user = {
+      id,
+      username,
+      email,
+      firstName,
+      lastName,
+      score,
+      targetGroup,
+    }
+
+    return res.json({ username, email, firstName, lastName, score })
   }
 
   // // Attempt regular LDAP authentication if running in production.
@@ -86,9 +85,16 @@ authenticationRouter.post('/authentication', async (req, res, next) => {
   // res.json(session.user)
 })
 
-// authenticationRouter.post('/signout', requiresLogin, (req, res, next) => {
-//   req.session.destroy()
-//   res.json()
-// })
+route.delete('/', requiresLogin, async (req, res, next) => {
+  req.session.destroy((err) => {
+    if (err) {
+      return next(err)
+    }
 
-module.exports = authenticationRouter
+    res
+      .clearCookie('connect.sid')
+      .json({ message: 'You have been logged out.' })
+  })
+})
+
+module.exports = route

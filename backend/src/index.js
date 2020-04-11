@@ -4,7 +4,7 @@ const { createTerminus } = require('@godaddy/terminus')
 
 const config = require('./config')
 const loaders = require('./loaders')
-const logger = require('./logger')
+const logger = require('./loaders/logger')
 
 async function startServer() {
   const app = express()

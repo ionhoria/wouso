@@ -3,51 +3,53 @@ const HttpStatus = require('http-status-codes')
 const helmet = require('helmet')
 const morgan = require('morgan')
 const cors = require('cors')
-const routes = require('../api')
-const { ServerError } = require('../api/errors')
-const logger = require('../logger')
 
-module.exports = (app, session) => {
+const YAML = require('yamljs')
+const swaggerUi = require('swagger-ui-express')
+const { OpenApiValidator } = require('express-openapi-validator')
+
+const coreRoutes = require('../api')
+const logger = require('./logger')
+
+module.exports = async (app, session, appRoutes) => {
   // middlewares
   app.use(helmet()) // security
   app.use(morgan(process.env.NODE_ENV === 'development' ? 'dev' : 'common')) // logging
   app.use(cors()) // use CORS
   app.use(express.json()) // parse request body as JSON
+  app.use(session)
 
-  // app.use(session)
+  // OpenAPI
+  const apiSpec = YAML.load('src/api/docs/openapi.yml')
+  app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(apiSpec))
 
-  app.use((req, res, next) => {
-    res._json = res.json
-    res.json = (data) => res._json({ data })
-    res.message = (message) => res._json({ message })
-    next()
-  })
+  await new OpenApiValidator({
+    apiSpec,
+    validateRequests: true,
+    validateResponses: true,
+  }).install(app)
 
   // status endpoint
   app.get('/ping', (req, res, next) => {
-    res.message('pong')
+    res.json({ message: 'pong' })
   })
 
-  // mount routes on /api
-  app.use('/api', routes())
+  // mount core routes on /api
+  app.use('/api', coreRoutes)
 
-  // 404 catch all
-  app.use((req, res, next) => {
-    next(
-      new ServerError(HttpStatus.NOT_FOUND, `Cannot ${req.method} ${req.url}`)
-    )
-  })
+  // mount app routes on /api/apps
+  app.use('/api/apps', appRoutes)
 
   // error handler
   app.use((err, req, res, next) => {
-    if (err instanceof ServerError) {
+    if (err.status < 500 && err.message) {
       const { status, message } = err
-      return res.status(status).message(message)
+      return res.status(status).json({ message })
     }
 
-    logger.error(err.stack)
+    logger.error(err.message)
     res
       .status(HttpStatus.INTERNAL_SERVER_ERROR)
-      .message('Something went wrong.')
+      .json({ message: 'Something went wrong.' })
   })
 }

@@ -48,10 +48,6 @@ class User extends Sequelize.Model {
       { sequelize }
     )
   }
-
-  static authenticate(username, password) {
-    return this.findOne({ where: { username } })
-  }
 }
 
 // // Perform LDAP authentication

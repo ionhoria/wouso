@@ -22,7 +22,7 @@ module.exports.requiresLogin = (req, res, next) => {
     return next(
       new ServerError(
         HttpStatus.UNAUTHORIZED,
-        'You must be logged in to view this page.'
+        'You must be logged in to access this.'
       )
     )
   }

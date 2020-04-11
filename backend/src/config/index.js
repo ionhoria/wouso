@@ -1,4 +1,4 @@
-const result = require('dotenv').config()
+require('dotenv').config()
 
 process.env.NODE_ENV = process.env.NODE_ENV || 'development'
 
@@ -20,5 +20,8 @@ module.exports = {
     secret: process.env.SESSION_SECRET,
     checkExpirationInterval: 15 * 60 * 1000,
     expiration: 7 * 24 * 60 * 60 * 1000,
+  },
+  logs: {
+    level: 'silly',
   },
 }

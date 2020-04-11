@@ -1,10 +1,8 @@
 const { Router } = require('express')
-const users = require('./routes/users')
+const session = require('./routes/session')
 
-module.exports = () => {
-  const app = Router()
+const app = Router()
 
-  app.use('/users', users)
+app.use('/session', session)
 
-  return app
-}
+module.exports = app
