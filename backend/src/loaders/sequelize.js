@@ -45,13 +45,13 @@ module.exports = async (appModels) => {
   })
   logger.debug('Database connection established.')
 
-  initAndAssociate(db, coreModels)
-  logger.debug('Core models loaded.')
+  initAndAssociate(db, { ...coreModels, ...appModels })
+  logger.debug('Models loaded.')
 
-  initAndAssociate(db, appModels)
-  logger.debug('App models loaded.')
+  // initAndAssociate(db, appModels)
+  // logger.debug('App models loaded.')
 
-  await db.sync({ force: true }).catch((err) => {
+  await db.sync().catch((err) => {
     logger.error(`${err.name}: ${err.message}`)
     process.exit(1)
   })

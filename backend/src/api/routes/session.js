@@ -13,8 +13,7 @@ route.get('/', requiresLogin, async (req, res, next) => {
 route.post('/', async (req, res, next) => {
   // Mock authentication if running in development mode.
   if (process.env.NODE_ENV === 'development') {
-    const { session } = req
-    let user = await User.findByPk(1)
+    let user = await User.findOne()
     if (!user) {
       const devUser = {
         username: 'admin',
@@ -36,7 +35,7 @@ route.post('/', async (req, res, next) => {
       targetGroup,
     } = user
 
-    session.user = {
+    req.session.user = {
       id,
       username,
       email,

@@ -1,6 +1,6 @@
 # Spins up a database container for development.
 
-version: '3.7'
+version: "3"
 
 services:
   mysql:
@@ -13,10 +13,13 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
     volumes:
-      - ./docker/database/data:/var/lib/mysql
-      - ./docker/database/scripts:/docker-entrypoint-initdb.d
+      - mysql-data:/var/lib/mysql
+      - ./docker/mysql/scripts:/docker-entrypoint-initdb.d
     ports:
       - 3306:3306
+    deploy:
+      placement:
+        constraints: [node.role == manager]
 
   phpmyadmin:
     depends_on:
@@ -29,3 +32,20 @@ services:
       PMA_PASSWORD: ${MYSQL_PASSWORD}
     ports:
       - 8080:80
+
+  grafana:
+    depends_on:
+      - mysql
+    image: grafana/grafana
+    restart: unless-stopped
+    volumes:
+      - grafana-data:/var/lib/grafana
+    ports:
+      - 3001:3000
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+
+volumes:
+  mysql-data:
+  grafana-data:

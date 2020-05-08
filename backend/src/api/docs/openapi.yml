@@ -1,7 +1,7 @@
-openapi: "3.0.2"
+openapi: '3.0.2'
 info:
   title: World of USO API
-  version: "1.0"
+  version: '1.0'
 servers:
   - url: http://localhost:5000
 paths:
@@ -10,5 +10,31 @@ paths:
       tags:
         - Health
       responses:
-        "200":
+        '200':
           description: OK
+  /api/session:
+    post:
+      tags:
+        - Session
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                foo:
+                  type: string
+              required:
+                - foo
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  bar:
+                    type: string
+                required:
+                  - bar
