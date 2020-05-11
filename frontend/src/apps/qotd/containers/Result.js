@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
@@ -10,35 +10,27 @@ import Unavailable from '../components/Unavailable'
 
 import { getQotd } from '../actions'
 
-class Answer extends React.Component {
-  state = { fetchFailed: false }
+function Answer(props) {
+  const [fetchFailed, setFetchFailed] = useState(false)
 
-  componentDidMount () {
-    const { qotd } = this.props
+  useEffect(() => {
+    const { qotd } = props
     // Only fetch qotd if not already in redux or more than 24 hours old
     if (!qotd || Date.now() - new Date(qotd.day) > 24 * 60 * 60 * 1000) {
-      this.props.getQotd().catch(() => this.setState({ fetchFailed: true }))
+      props.getQotd().catch(() => setFetchFailed(true))
     }
-  }
+  }, [props])
 
-  render () {
-    const { qotd } = this.props
-    if (this.state.fetchFailed) return <Unavailable />
-    if (!qotd || Date.now() - new Date(qotd.day) > 24 * 60 * 60 * 1000) {
-      return null
-    }
-    return <ResultComponent qotd={this.props.qotd} />
+  const { qotd } = props
+  if (fetchFailed) return <Unavailable />
+  if (!qotd || Date.now() - new Date(qotd.day) > 24 * 60 * 60 * 1000) {
+    return null
   }
+  return <ResultComponent qotd={props.qotd} />
 }
 
-const selector = createSelector(
-  selectAppData(manifest),
-  qotd => ({
-    qotd
-  })
-)
+const selector = createSelector(selectAppData(manifest), (qotd) => ({
+  qotd,
+}))
 
-export default connect(
-  selector,
-  { getQotd }
-)(Answer)
+export default connect(selector, { getQotd })(Answer)
