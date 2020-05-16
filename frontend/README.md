@@ -1,40 +1,56 @@
-# World of USO
+# World of USO web interface
 
-## Table of Contents
+## Contributing
 
+### Requiremets
 
-## Getting Started
+- `yarn`
 
-The following guide has been tested on Ubuntu 18.04.1 LTS
+### Development
 
-You will need to have git installed (we hope you already do):
-```
-sudo apt install git
-```
-
-Follow the yarn install guide.
-https://yarnpkg.com/lang/en/docs/install/#debian-stable
-You might not have curl installed. Get it with:
-```
-sudo apt install curl
+```sh
+cd frontend
+yarn install # get dependencies
+yarn start # start live development server
 ```
 
-Clone the repo:
+### Creating an app
+
+Take a look at the code structure of an existing app (i.e. `src/apps/qotd`), then follow the steps:
+
+- Create the following directory structure in `src/apps/<appName>`:
+
 ```
-git clone https://github.com/ionhoria/wouso-frontend.git
+actions/
+components/
+containers/
+  - Navigation.js
+  - Routes.js
+reducers/
+  - index.js
+manifest.js
 ```
 
-Run yarn and start the development server:
+- Create navigation structure in `src/apps/<appName>/containers/Navigation.js` and export it.
+- Create routes in `src/apps/<appName>/containers/Routes.js` and export them.
+- Create a Redux reducer in `src/apps/<appName>/reducers/index.js` and export it.
+- Fill out the app manifest in `src/apps/<appName>/manifest.js` and export it.
+
 ```
-yarn
-yarn start
+import Navigation from './containers/Navigation'
+import Routes from './containers/Routes'
+import rootReducer from './reducers'
+
+export default {
+  title: '<appTitle>',
+  baseUrl: '<appName>',
+  requiredBackendApps: ['<appName>'],
+  routes: Routes,
+  navigation: Navigation,
+  reducer: rootReducer
+}
 ```
 
-Great job! You are now up and running and ready to contribute to WoUSO.
-
-Use whichever editor you feel comfortable with, but make sure your code is
-formatted according to prettier-standard before submitting a pull requests. 
-https://github.com/sheerun/prettier-standard
-If in doubt, we recommend:
-Visual Studio Code - https://code.visualstudio.com/ with the extension
-"Prettier - Standard - Javascript Formatter" (numso.prettier-standard-vscode)
+- Add `getAppManifest('<appName>')` to the `manifests` array in `src/apps/manifests.js`.
+- Develop the rest of the application.
+- Test by running the web interface - the app should be accesible from the side menu.

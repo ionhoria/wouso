@@ -6,13 +6,17 @@ import { selectOrchestration } from 'core/app/reducers'
 import { selectApps } from 'core/app/reducers/orchestrationReducer'
 
 class Navigation extends React.Component {
-  render() {
+  render () {
     return this.props.render()
   }
 }
 
-const selector = createSelector(selectOrchestration, selectApps, (apps) => ({
-  apps,
-}))
+const selector = createSelector(
+  selectOrchestration,
+  selectApps,
+  apps => ({
+    apps
+  })
+)
 
 export default connect(selector)(Navigation)
