@@ -1,5 +1,4 @@
-import React from 'react'
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 import * as manifest from '../manifest'
@@ -14,22 +13,21 @@ import { checkSession } from '../../../core/app/actions/session'
 import { reduxForm } from 'redux-form'
 const AnswerForm = reduxForm({ form: 'qotd/Answer' })(AnswerComponent)
 
-function Answer(props) {
+function Answer({ qotd, getQotd, postQotd, checkSession, history }) {
   const [fetchFailed, setFetchFailed] = useState(false)
-  const { qotd } = props
 
   useEffect(() => {
     // Only fetch qotd if not already in redux or more than 24 hours old
     if (!qotd || Date.now() - new Date(qotd.day) > 24 * 60 * 60 * 1000) {
-      props.getQotd().catch(() => setFetchFailed(true))
+      getQotd().catch(() => setFetchFailed(true))
     }
-  }, [qotd, props])
+  }, [qotd, getQotd])
 
   const onSubmit = ({ answer }) => {
-    const { day } = props.qotd
-    props.postQotd({ day, answer }).then(() => {
-      props.checkSession()
-      props.history.push('/qotd/result')
+    const { day } = qotd
+    postQotd({ day, answer }).then(() => {
+      checkSession()
+      history.push('/qotd/result')
     })
   }
 

@@ -10,23 +10,22 @@ import Unavailable from '../components/Unavailable'
 
 import { getQotd } from '../actions'
 
-function Answer(props) {
+function Answer({ qotd, getQotd }) {
   const [fetchFailed, setfetchFailed] = useState(false)
-  const { qotd } = props
 
   useEffect(() => {
     // Only fetch qotd if not already in redux or more than 24 hours old
     if (!qotd || Date.now() - new Date(qotd.day) > 24 * 60 * 60 * 1000) {
-      props.getQotd().catch(() => setfetchFailed(true))
+      getQotd().catch(() => setfetchFailed(true))
     }
-  }, [qotd, props])
+  }, [qotd, getQotd])
 
   if (fetchFailed)
     return <Unavailable />
   if (!qotd || Date.now() - new Date(qotd.day) > 24 * 60 * 60 * 1000) {
     return null
   }
-  return <ResultComponent qotd={props.qotd} />
+  return <ResultComponent qotd={qotd} />
 
 }
 
