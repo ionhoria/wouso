@@ -33,19 +33,5 @@ services:
     ports:
       - 8080:80
 
-  grafana:
-    depends_on:
-      - mysql
-    image: grafana/grafana
-    restart: unless-stopped
-    volumes:
-      - grafana-data:/var/lib/grafana
-    ports:
-      - 3001:3000
-    deploy:
-      placement:
-        constraints: [node.role == manager]
-
 volumes:
   mysql-data:
-  grafana-data:

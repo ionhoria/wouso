@@ -1,6 +1,5 @@
 const { Router } = require('express')
 const shuffle = require('lodash/shuffle')
-const moment = require('moment')
 const Sequelize = require('sequelize')
 const { QotdInstance, QotdQuestion, QotdAnswer } = require('../models')
 const { User } = require('../../../models')
@@ -81,7 +80,6 @@ route.post('/', async (req, res, next) => {
   const { day, answer } = req.body
   const today = new Date().setHours(0, 0, 0, 0)
   if (!answer || new Date(day).setHours(0, 0, 0, 0) !== today) {
-    console.log('different')
     return next({ status: 400, message: 'Wrong day' })
   }
   try {
@@ -93,10 +91,10 @@ route.post('/', async (req, res, next) => {
       },
     })
     if (!qotd) {
-      throw "No qotd found! This is weird... Someone posted an answer for\
-      today's qotd without ever fetching (or knowing) today's qotd"
+      throw new Error(
+        "No qotd found! This is weird... Someone posted an answer for today's qotd without ever fetching (or knowing) today's qotd"
+      )
     }
-    console.log(userId)
     const valid = answer === qotd.QotdQuestion.answers.valid
     await QotdAnswer.create({
       UserId: userId,
@@ -105,15 +103,9 @@ route.post('/', async (req, res, next) => {
       QotdInstanceDay: today,
     })
     let scoreDelta = valid ? 100 : 0
-    // if (moment.duration(moment().diff(moment(day))).asHours() < DOUBLE_TIME) {
-    //   scoreDelta *= 2
-    // }
-    // await Activity.create({
-    //   text: `${valid ? 'Valid' : 'Invalid'} answer for qotd on ${day}`,
-    //   scoreDelta,
-    //   userId,
-    // })
-    if (scoreDelta != 0) {
+    // TODO: Apply a score multiplier for answering before noon
+    // TODO: Record transaction in the activity log
+    if (scoreDelta !== 0) {
       await User.update(
         { score: Sequelize.literal(`score + ${scoreDelta}`) },
         { where: { id: userId } }

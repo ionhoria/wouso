@@ -28,9 +28,6 @@ services:
       PMA_PASSWORD: wouso
     ports:
       - 8080:80
-    deploy:
-      placement:
-        constraints: [node.role == manager]
 
   wouso-backend:
     depends_on:
@@ -50,6 +47,11 @@ services:
       - 5000:5000
     deploy:
       replicas: 2
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 3
+        window: 120s
 
   wouso-frontend:
     depends_on:
@@ -60,6 +62,11 @@ services:
       - 3000:80
     deploy:
       replicas: 2
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 3
+        window: 120s
 
   grafana:
     depends_on:
