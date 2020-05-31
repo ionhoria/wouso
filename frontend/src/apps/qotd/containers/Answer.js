@@ -1,5 +1,4 @@
-import React from 'react'
-
+import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 import * as manifest from '../manifest'
@@ -14,37 +13,32 @@ import { checkSession } from '../../../core/app/actions/session'
 import { reduxForm } from 'redux-form'
 const AnswerForm = reduxForm({ form: 'qotd/Answer' })(AnswerComponent)
 
-class Answer extends React.Component {
-  state = {
-    fetchFailed: false,
-  }
+function Answer({ qotd, getQotd, postQotd, checkSession, history }) {
+  const [fetchFailed, setFetchFailed] = useState(false)
 
-  componentDidMount() {
-    const { qotd } = this.props
+  useEffect(() => {
     // Only fetch qotd if not already in redux or more than 24 hours old
     if (!qotd || Date.now() - new Date(qotd.day) > 24 * 60 * 60 * 1000) {
-      this.props.getQotd().catch(() => this.setState({ fetchFailed: true }))
+      getQotd().catch(() => setFetchFailed(true))
     }
-  }
+  }, [qotd, getQotd])
 
-  onSubmit = ({ answer }) => {
-    const { day } = this.props.qotd
-    this.props.postQotd({ day, answer }).then(() => {
-      this.props.checkSession()
-      this.props.history.push('/qotd/result')
+  const onSubmit = ({ answer }) => {
+    const { day } = qotd
+    postQotd({ day, answer }).then(() => {
+      checkSession()
+      history.push('/qotd/result')
     })
   }
 
-  render() {
-    const { qotd } = this.props
-    if (this.state.fetchFailed) {
-      return <Unavailable />
-    }
-    if (!qotd || Date.now() - new Date(qotd.day) > 24 * 60 * 60 * 1000) {
-      return null
-    }
-    return <AnswerForm onSubmit={this.onSubmit} qotd={qotd} />
+  if (fetchFailed) {
+    return <Unavailable />
   }
+  if (!qotd || Date.now() - new Date(qotd.day) > 24 * 60 * 60 * 1000) {
+    return null
+  }
+  return <AnswerForm onSubmit={onSubmit} qotd={qotd} />
+
 }
 
 const selector = createSelector(selectAppData(manifest), (qotd) => ({
